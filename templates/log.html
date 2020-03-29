@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <div class="log">
+      <el-timeline>
+        <el-timeline-item timestamp="2020/3/25" placement="top" type="primary">
+          <el-card>
+            <h4>查询幼儿园小班视频a</h4>
+            <p>警方 提交于 2020/3/25 20:46</p>
+          </el-card>
+        </el-timeline-item>
+        <el-timeline-item timestamp="2020/4/3" placement="top" type="info">
+          <el-card>
+            <h4>下载幼儿园小班视频a</h4>
+            <p>王大妈 提交于 2020/4/3 20:46</p>
+          </el-card>
+        </el-timeline-item>
+        <el-timeline-item timestamp="2020/4/4" placement="top" type="danger">
+          <el-card>
+            <h4>下载并覆盖幼儿园小班视频a</h4>
+            <p>管理员犯某 提交于 2020/4/4 20:46</p>
+          </el-card>
+        </el-timeline-item>
+      </el-timeline>
+</div>
+    <script>
+         var app = new Vue({
+        el: "#app",
+    })
+    </script>
+{% endblock %}

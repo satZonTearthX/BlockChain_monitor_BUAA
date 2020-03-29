@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+
+    <div id="list">
+    <el-col>
+        <el-form :label-position="labelPosition" label-width="50px" :model="formLabelAlign">
+            <el-row :gutter="20">
+                <el-col :span="6">
+                <el-form-item label="时间">
+                <el-date-picker
+                        v-model="form.datetime"
+                        type="date"
+                        format="yyyy-MM-dd"
+                        value-format="yyyy-MM-dd"
+                        placeholder="选择日期">
+                </el-date-picker>
+
+                </el-form-item>
+                </el-col>
+                <el-col :span="5">
+            <el-form-item label="地点">
+                <el-autocomplete
+                  class="inline-input"
+                  v-model="form.state1"
+                  :fetch-suggestions="querySearch"
+                  placeholder="请输入内容"
+                  clearable
+                  @select="handleSelect"
+
+                ></el-autocomplete>
+            </el-form-item>
+                </el-col>
+                <el-col :span="4">
+            <el-form-item>
+                <el-button size="small" type="primary"  @click="query">查询</el-button>
+
+            </el-form-item>
+                </el-col>
+            </el-row>
+        </el-form>
+    </el-col>
+     <el-col>
+        <el-table :data="tableData"
+        :default-sort = "{prop: 'name', order: 'descending'}">
+            <el-table-column label="视频名称" prop="name" sortable filterable></el-table-column>
+            <el-table-column label="创建时间" prop="created_at" sortable></el-table-column>
+            <el-table-column label="地点" prop="address" sortable></el-table-column>
+            <el-table-column label="操作" prop="operation">
+                <template slot-scope="scope">
+                    <el-button size="small" type="primary" @click="openVideo(scope.row.name)">播放</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+     </el-col>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                tableData: [],
+                form: {
+                    datetime: '',
+                    state1: '',
+                    cameras: []
+                }
+            },
+            methods: {
+                openVideo(filename) {
+                    window.location = "/video/detail?filename=" + filename;
+                },
+                formatter(row, column) {
+                return row.operation;
+                },
+                query() {//筛选条件
+                    console.log("time0ca="+this.form.cameras)
+                    console.log("time0td="+this.tableData)
+                    this.tableData=this.form.cameras//每次操作要获得原始的目录
+
+                    let finalData=[]
+                    let datetime=''
+                    let CN_Address=''
+                    if (this.form.datetime.length==0) {
+                        datetime=''
+                    }
+                  else {
+                      datetime = this.form.datetime.split("-").join("")
+                    }
+
+                  if (this.form.state1.length==0) {
+                        CN_Address=''
+                    }
+                    else{
+                        CN_Address = this.form.state1
+                  }
+
+                    //处理筛选
+                    if (datetime===''){
+                            for (let i in this.tableData) {
+                                if (this.tableData[i].address.toLowerCase().indexOf(CN_Address) !== -1) {
+                                    console.log(this.tableData[i].address)
+                                    finalData.push(this.tableData[i])
+                                } //将想要展示的数据作为value
+                            }
+
+                    }//以上是时间空白情况
+                  else {
+
+                        for (let i in this.tableData) {
+                            if (this.tableData[i].address.toLowerCase().indexOf(CN_Address) !== -1 && this.tableData[i].name.slice(0, 8) === datetime) {
+                                finalData.push(this.tableData[i])
+                            }
+                        }
+                    }
+                this.tableData=finalData;
+                  },
+
+
+
+
+                querySearch(queryString, cb) {//提示型输入
+                    var cameras = this.form.cameras;
+                    var results = queryString ? cameras.filter(this.createFilter(queryString)) : cameras;
+
+                    // 调用 callback 返回建议列表的数据
+                    cb(results);
+
+                  },
+                  createFilter(queryString) {
+                    return (camera) => {
+                      return (camera.address.toLowerCase().indexOf(queryString.toLowerCase()) !== -1 );
+                    };
+                  },
+
+                handleSelect(item) {
+                    console.log("item="+item);
+                 }
+            },
+
+
+            mounted() {
+
+                axios.get('/list/get').then(
+                    resp => {
+                        for(let i of resp.data){
+                        i.value = i.address;  //将想要展示的数据作为value
+                     }
+                        this.form.cameras=resp.data;
+                        this.tableData = resp.data;//视频显示数据
+
+                    }
+                )
+            }
+        })
+    </script>
+{% endblock %}

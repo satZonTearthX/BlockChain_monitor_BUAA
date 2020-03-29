@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <div id="q">
+        <el-col>
+            <el-form :label-position="labelPosition" label-width="50px" :model="formLabelAlign">
+            <el-form-item label="时间">
+                <el-date-picker
+                        v-model="form.datetime"
+                        type="datetime"
+                        format="yyyy-MM-dd HH:mm"
+                        value-format="yyyy-MM-dd-HH-mm"
+                        placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="地点">
+                <el-select v-model="form.place">
+                    <el-option value="北京" label="北京"></el-option>
+                    <el-option value="上海" label="上海"></el-option>
+                    <el-option value="广州" label="广州"></el-option>
+                    <el-option value="天津" label="天津"></el-option>
+                    <el-option value="重庆" label="重庆"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="success" icon="el-icon-check" circle @click="query"></el-button>
+
+            </el-form-item>
+        </el-form>
+        </el-col>
+        <el-col>
+            <el-calendar :range="['2019-03-04', '2019-03-24']"> </el-calendar>
+        </el-col>
+    </div>
+<script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                form: {
+                    datetime: '',
+                    place: '',
+                }
+            },
+            methods: {
+                query() {
+
+                    let datetime = this.form.datetime.split("-").join("");
+                    let macAdress = ''
+                    if (this.form.place == '北京'){
+                        macAdress = '701824309'
+                    }
+                    else if (this.form.place == '上海'){
+                        macAdress = '701824310'
+                    }
+                    else if (this.form.place == '广州'){
+                        macAdress = '701824311'
+                    }
+                    else if (this.form.place == '天津'){
+                        macAdress = '701824312'
+                    }
+                    else if (this.form.place == '重庆'){
+                        macAdress = '701824313'
+                    }
+                    let param = '1%'+ macAdress +'%'+ datetime ;
+                    axios.post("/q", {param: param}).then(
+                        resp => {
+                            if (resp.data.result != 0) {
+                                let fileDowload=resp.data.result
+                                this.$confirm('存在此文件, 是否下载?', '提示', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                                }).then(() => {
+                                    axios.post("/video/download", {param: fileDowload}).then(
+                                        resp => {
+                                            this.$alert('已下载完成，请检查', '下载完毕', {
+                                                confirmButtonText: '确定',
+                                            });
+                                        }
+                                    )
+                                }).catch(() => {
+
+                                });
+                            } else {
+                                this.$alert('没有符合条件的资源', '无结果', {
+                                    confirmButtonText: '确定',
+                                });
+                            }
+                        }
+                    )
+                }
+            }
+        })
+    </script>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <link rel="stylesheet" href="{% static 'css/player.css' %}"/>
+    <div id="player">
+
+        <h2>{{ video_name }}</h2>
+        <p>{{ video_created_at }}</p>
+        <el-row :gutter="20">
+        <el-col :span="12">
+        <div style="margin-left: 10%">
+            <video width="600px" height="400px" controls>
+                <source src="{{ video_url }}" type="video/mp4">
+            </video>
+            <p>
+                <el-button @click="hashVerity">HASH校验</el-button>
+            </p>
+        </div>
+        </el-col>
+        <el-col :span="12">
+            <div id="div_qr" style="display: none">
+                <img id="qrcode"  src="/static/images/black.jpg"  >
+            </div>
+        </el-col>
+        </el-row>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                fileName: '{{ video_name }}',
+                videoCreateTime:'{{ video_created_at }}',
+                visible:false
+            },
+            methods: {
+                {#在此处进行修改#}
+                hashVerity() {
+                    axios.get('/video/hash', {params: {filename: this.fileName,videoCreateTime:this.videoCreateTime}}).then(
+                        resp => {
+                            if (resp.data.result) {
+                                this.$confirm('文件被修改，是否查看详情', '校验', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                                }).then(() => {
+                                    let pic=document.getElementById("qrcode")
+                                    pic.src="/static/qrcode/"+resp.data.imgName
+                                    document.getElementById("div_qr").style.display="block";
+                                }).catch(() => {
+
+                                });
+                            } else {
+                                this.$confirm('文件未被修改，是否查看详情', '校验', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                                }).then(() => {
+                                    let pic=document.getElementById("qrcode")
+                                    pic.src="/static/qrcode/"+resp.data.imgName
+                                    document.getElementById("div_qr").style.display="block";
+                                }).catch(() => {
+
+                                });
+                            }
+
+                        }
+                    )
+                }
+            }
+        })
+    </script>
+{% endblock %}

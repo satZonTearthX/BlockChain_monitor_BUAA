@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style type="text/css">
+    body {background-image:url(/static/images/snow.jpg);
+    background-size:cover}
+    </style>
+    <meta charset="UTF-8">
+    <title>登陆</title>
+    <link rel="stylesheet" href="{% static 'css/element.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}"/>
+    <script src="{% static 'js/vue.js' %}"></script>
+    <script src="{% static 'js/element.js' %}"></script>
+    <script src="{% static 'js/axios.min.js' %}"></script>
+</head>
+<body>
+
+    <div id="login">
+
+        <div id="content-area-div">
+            <div id="content-div">
+                <el-form v-bind:model="form" v-bind:ref="form" v-bind:rules="rules" size="medium">
+                    <el-form-item label="用户名：" prop="username">
+                        <el-input v-model="form.username"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码：" prop="password">
+                        <el-input type="password" v-on:keyup.enter.native="login(form)" v-model="form.password"></el-input>
+                    </el-form-item>
+                </el-form>
+                <el-row>
+                    <el-col :span="4"><div class="grid-content bg-purple"></div></el-col>
+                    <el-col :span="4"><div class="grid-content bg-purple"></div></el-col>
+                    <el-col :span="4"><div class="grid-content bg-purple"></div></el-col>
+                    <el-col :span="4"><div class="grid-content bg-purple"></div></el-col>
+                    <el-col :span="4"><div class="grid-content bg-purple"></div></el-col>
+
+{#                    <el-col :span="4">#}
+
+                        <div class="right-items" style="float: right;">
+                        <el-button type="primary" icon="el-icon-arrow-right" v-on:click="login(form)">登录</el-button>
+                        </div>
+{#                    </el-col>#}
+                </el-row>
+            </div>
+        </div>
+    </div>
+
+
+
+<script>
+    var app = new Vue({
+        el: '#login',
+        data: {
+            form: {
+                username: '',
+                password: '',
+            },
+            rules: {
+                username: [
+                    {required: true, message: '账号密码不能为空', trigger: 'blur'},
+                ],
+                password: [
+                    {required: true, message: '账号密码不能为空', trigger: 'blur'},
+                ]
+            }
+        },
+        methods: {
+            login: function (form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        axios.post('/login', this.form).then((resp) => {
+                            if (resp.data.login === true) {
+                                window.location = '/';
+                            } else {
+                                this.$message({
+                                    showClose: true,
+                                    type: 'error',
+                                    message: "账号密码错误",
+                                });
+                            }
+                        }).catch((e) => {
+                            console.log(e);
+                        })
+                    } else {
+                        return false;
+                    }
+                })
+            }
+        }
+    })
+</script>
+</body>
+</html>

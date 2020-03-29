@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/q_all.css' %}"/>
+
+    <div id="q_all">
+    <el-container>
+
+         <el-transfer
+            filterable
+            :filter-method="filterMethod"
+            filter-placeholder="请输入摄像头名"
+            v-model="value"
+            :titles="['视频列表', '下载列表']"
+            :data="data">
+             <el-footer class="transfer-footer"slot="left-footer"size="small"></el-footer>
+             <el-button class="transfer-footer"slot="right-footer"size="small" @click="download" type="warning" center="true">下载</el-button>
+         </el-transfer>
+
+    </el-container>
+    </div>
+    <script>
+ var Main = {
+     el: '#app',
+    data() {
+      const generateData = _ => {
+        const loc_dic={}
+        var data = [];
+        var cities = {{ videolist|safe }};
+        var pinyin = {{ namelist|safe }};
+        cities.forEach((city, index) => {
+          data.push({
+            label: city,
+            key: index,
+            pinyin: pinyin[index]
+          });
+        });
+        return data;
+      };
+      return {
+        data: generateData(),
+        value: [],
+        filterMethod(query, item) {
+          return item.pinyin.indexOf(query) > -1;
+        }
+      };
+    },
+    methods:{
+         download(){
+             let  dataSelected = this.value;
+             {#this.$alert(dataSelected)#}
+             let download_str=[];
+             let alert_shown='';
+             var sum=dataSelected.length-1
+             for (i in dataSelected){
+                 download_str.push(this.data[i].label)
+                 alert_shown=alert_shown+this.data[i].label
+                 if (sum>0) {
+                     alert_shown=alert_shown+'\n'
+                 }
+                 sum=sum-1;//避免尾部换行多出来
+             }
+               {#download_str=this.data[dataSelected[0]].label#}
+                 this.$confirm('是否下载'+alert_shown+'?', '提示', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                                }).then(() => {axios.post("/video/download", {param: download_str}).then(
+                                        resp => {
+                                            this.$alert('已下载完成，请检查', '下载完毕', {
+                                                confirmButtonText: '确定',
+                                            });
+                                        }
+                                    )
+
+                                }).catch(() => {
+
+                                });
+         }
+    }
+  };
+var Ctor = Vue.extend(Main)
+new Ctor().$mount('#app')
+</script>
+{% endblock %}
