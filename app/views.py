@@ -185,6 +185,8 @@ def login(request):
                 # if str(os.getcwd()[-5:]) != 'media':
                 #     print(os.getcwd())
                 #     print('88888')
+                if not (os.path.exists('media')):
+                    os.makedirs('media')    
                 os.chdir(settings.MEDIA_DIR)  # 进入视频总文件夹，以后要加密
                 if not (os.path.exists(user_name)):
                     os.makedirs(user_name)
